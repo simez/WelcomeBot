@@ -10,6 +10,7 @@ final class ViewController: UIViewController {
     
     let logo = UIImageView(image: #imageLiteral(resourceName: "logo.png"))
     let label = UILabel()
+    let labelBG = UIView()
     
     var currentImage:CIImage!
     var lastCheck = Date()
@@ -17,6 +18,10 @@ final class ViewController: UIViewController {
     let synthesizer = AVSpeechSynthesizer()
     let faceDetection = VNDetectFaceRectanglesRequest()
     let faceDetectionRequest = VNSequenceRequestHandler()
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
     
     var frontCamera: AVCaptureDevice? = {
         return AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType.video, position: .front)
@@ -38,20 +43,31 @@ final class ViewController: UIViewController {
         logo.contentMode = .scaleAspectFit
         view.addSubview(logo)
         
+        labelBG.translatesAutoresizingMaskIntoConstraints = false
+        labelBG.backgroundColor = UIColor.init(white: 0, alpha: 0.6)
+        view.addSubview(labelBG)
+        
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textColor = .white
         label.font = UIFont.boldSystemFont(ofSize: 24)
         label.lineBreakMode = .byWordWrapping
         label.numberOfLines = 0
-        label.preferredMaxLayoutWidth = view.frame.width - 20
-        view.addSubview(label)
+        label.textAlignment = .center
+        label.preferredMaxLayoutWidth = view.frame.width - 40
+        label.text = "Hello!"
+        labelBG.addSubview(label)
         
         NSLayoutConstraint.activate([
             logo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             logo.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.5),
             logo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -33),
+            label.topAnchor.constraint(equalTo: labelBG.topAnchor, constant: 20),
+            label.leftAnchor.constraint(equalTo: labelBG.leftAnchor, constant: 20),
+            label.rightAnchor.constraint(equalTo: labelBG.rightAnchor, constant: -20),
+            label.bottomAnchor.constraint(equalTo: labelBG.bottomAnchor, constant: -20),
+            labelBG.leftAnchor.constraint(equalTo: view.leftAnchor),
+            labelBG.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            labelBG.widthAnchor.constraint(equalTo: view.widthAnchor),
         ])
     }
     
@@ -72,7 +88,7 @@ final class ViewController: UIViewController {
         view.layer.addSublayer(previewLayer)
         
         view.bringSubview(toFront: logo)
-        view.bringSubview(toFront: label)
+        view.bringSubview(toFront: labelBG)
     }
 
     func sessionPrepare() {
