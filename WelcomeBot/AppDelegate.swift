@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  WelcomeBot
-//
-//  Created by Pawel Chmiel on 21.06.2017.
-//  Copyright © 2017 Droids On Roids. All rights reserved.
-//
-
 import UIKit
 
 @UIApplicationMain

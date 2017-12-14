@@ -1,11 +1,3 @@
-//
-//  ViewController.swift
-//  WelcomeBot
-//
-//  Created by Pawel Chmiel on 21.06.2017.
-//  Copyright © 2017 Droids On Roids. All rights reserved.
-//
-
 import UIKit
 import Vision
 import Alamofire
@@ -15,7 +7,6 @@ import AVFoundation
 final class ViewController: UIViewController {
     let delay:Double = 3
     var session: AVCaptureSession?
-    let background = UIImageView()
     
     let logo = UIImageView(image: #imageLiteral(resourceName: "logo.png"))
     let label = UILabel()
@@ -31,11 +22,17 @@ final class ViewController: UIViewController {
         return AVCaptureDevice.default(AVCaptureDevice.DeviceType.builtInWideAngleCamera, for: AVMediaType.video, position: .front)
     }()
     
+    lazy var previewLayer: AVCaptureVideoPreviewLayer? = {
+        guard let session = self.session else { return nil }
+        
+        var previewLayer = AVCaptureVideoPreviewLayer(session: session)
+        previewLayer.videoGravity = .resizeAspectFill
+        
+        return previewLayer
+    }()
+    
     override func loadView() {
         super.loadView()
-        
-        background.backgroundColor = .black
-        view.addSubview(background)
         
         logo.translatesAutoresizingMaskIntoConstraints = false
         logo.contentMode = .scaleAspectFit
@@ -56,15 +53,26 @@ final class ViewController: UIViewController {
             label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             label.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -33),
         ])
-        
-        background.frame = view.frame
-        background.contentMode = .scaleAspectFill
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         sessionPrepare()
         session?.startRunning()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        previewLayer?.frame = view.frame
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard let previewLayer = previewLayer else { return }
+        view.layer.addSublayer(previewLayer)
+        
+        view.bringSubview(toFront: logo)
+        view.bringSubview(toFront: label)
     }
 
     func sessionPrepare() {
@@ -136,7 +144,6 @@ final class ViewController: UIViewController {
                 if !results.isEmpty {
                     let imageData = CIContext().jpegRepresentation(of: self.currentImage, colorSpace: CGColorSpaceCreateDeviceRGB(), options: [kCGImageDestinationLossyCompressionQuality: 0.0])
                     NSLog("Sending image of size \(imageData!.count)")
-                    self.background.image = UIImage(ciImage: self.currentImage)
                     
                     Alamofire.upload(imageData!, to: "https://terem-welcome.herokuapp.com/").responseJSON { response in
                         if response.result.value != nil {
