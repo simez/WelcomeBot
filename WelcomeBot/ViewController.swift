@@ -13,7 +13,8 @@ final class ViewController: UIViewController {
     let labelBG = UIView()
     
     var currentImage:CIImage!
-    var lastCheck = Date()
+    var lastUploadDate = Date()
+    var lastSeenPerson = ""
     
     let synthesizer = AVSpeechSynthesizer()
     let faceDetection = VNDetectFaceRectanglesRequest()
@@ -54,7 +55,6 @@ final class ViewController: UIViewController {
         label.numberOfLines = 0
         label.textAlignment = .center
         label.preferredMaxLayoutWidth = view.frame.width - 40
-        label.text = "Hello!"
         labelBG.addSubview(label)
         
         NSLayoutConstraint.activate([
@@ -127,6 +127,12 @@ final class ViewController: UIViewController {
         let bits = name.split(separator: "-")
         let person = bits[0].capitalized
         
+        if person == lastSeenPerson {
+            return
+        }
+        
+        lastSeenPerson = person
+        
         let greeting = PickOne([
             "Welcome \(person)!",
             "\(person) has entered the building",
@@ -148,11 +154,11 @@ final class ViewController: UIViewController {
     }
     
     func detectFace() {
-        if Date().timeIntervalSince1970 - lastCheck.timeIntervalSince1970 < delay {
+        if Date().timeIntervalSince1970 - lastUploadDate.timeIntervalSince1970 < delay {
             return
         }
         
-        lastCheck = Date()
+        lastUploadDate = Date()
         
         try? faceDetectionRequest.perform([faceDetection], on: currentImage!)
         if let results = faceDetection.results as? [VNFaceObservation] {
